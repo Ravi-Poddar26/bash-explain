@@ -103,3 +103,15 @@ class CommandExplainer:
         '--help': 'Display help information',
         '--version': 'Display version information',
     }
+
+    UNSAFE_PATTERNS = [
+        (r'rm\s+-rf\s+/', 'DANGEROUS: This will delete files starting from root directory'),
+        (r'chmod\s+777', 'UNSAFE: Grants full permissions to everyone'),
+        (r'curl\s+.*\|\s*bash', 'RISKY: Executing downloaded script without inspection'),
+        (r'wget\s+.*\|\s*sh', 'RISKY: Executing downloaded script without inspection'),
+        (r'sudo\s+chmod', 'CAUTION: Changing permissions as superuser'),
+        (r'sudo\s+rm', 'CAUTION: Deleting files as superuser'),
+        (r':\(\)\{.*\};:', 'DANGEROUS: Fork bomb - will crash system'),
+        (r'dd\s+if=.*of=/dev/sd', 'DANGEROUS: Writing to disk device'),
+        (r'mkfs', 'DANGEROUS: Formatting disk - will erase all data'),
+    ]
