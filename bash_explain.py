@@ -136,3 +136,10 @@ class CommandExplainer:
         (r'cat\s+/dev/zero\s*>\s*/dev/(?:sd|nvme|mmcblk)', 'DANGEROUS: Overwriting disk with zeros'),
         (r'nohup\s+.*&\s*$', 'CAUTION: Backgrounding processes without control may leave unmanaged jobs'),
     ]
+def check_safety(self, command: str) -> List[str]:
+    """Check for dangerous command patterns"""
+    warnings = []
+    for pattern, message in self.UNSAFE_PATTERNS:
+        if re.search(pattern, command):
+            warnings.append(message)
+    return warnings
