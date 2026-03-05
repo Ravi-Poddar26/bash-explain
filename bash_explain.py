@@ -136,10 +136,67 @@ class CommandExplainer:
         (r'cat\s+/dev/zero\s*>\s*/dev/(?:sd|nvme|mmcblk)', 'DANGEROUS: Overwriting disk with zeros'),
         (r'nohup\s+.*&\s*$', 'CAUTION: Backgrounding processes without control may leave unmanaged jobs'),
     ]
-def check_safety(self, command: str) -> List[str]:
-    """Check for dangerous command patterns"""
-    warnings = []
-    for pattern, message in self.UNSAFE_PATTERNS:
-        if re.search(pattern, command):
-            warnings.append(message)
-    return warnings
+
+def explain_command(self, command: str) -> str:
+        """Explain a Bash command in detail"""
+        command = command.strip()
+        
+        if not command:
+            return "No command provided."
+        
+        output = []
+        output.append(f" Explaining: {command}\n")
+        
+        # Check for unsafe patterns
+        warnings = self._check_safety(command)
+        if warnings:
+            output.append("⚠️  SAFETY WARNINGS:")
+            for warning in warnings:
+                output.append(f"   {warning}")
+            output.append("")
+        
+        # Parse the command
+        parts = self._parse_command(command)
+        
+        # Explain main command
+        if parts['command']:
+            cmd_name = parts['command']
+            cmd_desc = self.COMMON_COMMANDS.get(cmd_name, 'Custom command or script')
+            output.append(f"🔧 Command: {cmd_name}")
+            output.append(f"   {cmd_desc}\n")
+        
+        # Explain flags
+        if parts['flags']:
+            output.append("Flags:")
+            for flag in parts['flags']:
+                flag_desc = self.COMMON_FLAGS.get(flag, self._guess_flag_meaning(flag))
+                output.append(f"   {flag} → {flag_desc}")
+            output.append("")
+        
+        # Explain arguments
+        if parts['arguments']:
+            output.append("Arguments:")
+            for i, arg in enumerate(parts['arguments'], 1):
+                arg_type = self._identify_argument_type(arg)
+                output.append(f"   {i}. {arg} ({arg_type})")
+            output.append("")
+        
+        # Explain pipes
+        if parts['pipes']:
+            output.append("Pipes:")
+            output.append("   Commands are chained - output of one becomes input of next")
+            for i, pipe_cmd in enumerate(parts['pipes'], 1):
+                output.append(f"   {i}. {pipe_cmd}")
+            output.append("")
+        
+        # Explain redirections
+        if parts['redirections']:
+            output.append("Redirections:")
+            for redir in parts['redirections']:
+                output.append(f"   {redir['symbol']} {redir['target']} → {redir['description']}")
+            output.append("")
+        
+        # Add educational note
+        output.append("💡 Tip: Use 'man <command>' for detailed documentation")
+        
+        return "\n".join(output)
