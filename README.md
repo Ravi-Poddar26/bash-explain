@@ -44,6 +44,7 @@ A Python-based tool for explaining Bash commands with intelligent parsing, flag 
 🔄 Configuration support  
 🔄 Extended command database  
 
-## Author
+## Authors
 
-Ashish Singh , Ravi Poddar
+- Ashish Singh
+- Ravi Poddar
