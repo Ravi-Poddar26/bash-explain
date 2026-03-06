@@ -200,3 +200,56 @@ def explain_command(self, command: str) -> str:
         output.append("💡 Tip: Use 'man <command>' for detailed documentation")
         
         return "\n".join(output)
+def _parse_command(self, command: str) -> Dict:
+        """Parse command into components"""
+        result = {
+            'command': None,
+            'flags': [],
+            'arguments': [],
+            'pipes': [],
+            'redirections': []
+        }
+        
+        # Check for pipes
+        if '|' in command:
+            pipe_parts = command.split('|')
+            result['pipes'] = [p.strip() for p in pipe_parts]
+            command = pipe_parts[0].strip()  # Process first part
+        
+        # Check for redirections
+        redir_patterns = [
+            (r'>>?\s*(\S+)', 'redirect output to file'),
+            (r'2>>?\s*(\S+)', 'redirect errors to file'),
+            (r'&>>?\s*(\S+)', 'redirect both output and errors to file'),
+            (r'<\s*(\S+)', 'read input from file'),
+        ]
+        
+        for pattern, desc in redir_patterns:
+            matches = re.finditer(pattern, command)
+            for match in matches:
+                symbol = match.group(0).split()[0]
+                target = match.group(1)
+                result['redirections'].append({
+                    'symbol': symbol,
+                    'target': target,
+                    'description': desc
+                })
+                command = command.replace(match.group(0), '')
+        
+        # Split into tokens
+        tokens = command.split()
+        
+        if not tokens:
+            return result
+        
+        # First token is usually the command
+        result['command'] = tokens[0]
+        
+        # Process remaining tokens
+        for token in tokens[1:]:
+            if token.startswith('-'):
+                result['flags'].append(token)
+            else:
+                result['arguments'].append(token)
+        
+        return result
