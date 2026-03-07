@@ -253,3 +253,21 @@ def _parse_command(self, command: str) -> Dict:
                 result['arguments'].append(token)
         
         return result
+    
+def _check_safety(self, command: str) -> List[str]:
+        """Check for unsafe command patterns"""
+        warnings = []
+        for pattern, warning in self.UNSAFE_PATTERNS:
+            if re.search(pattern, command):
+                warnings.append(warning)
+        return warnings
+    
+def _guess_flag_meaning(self, flag: str) -> str:
+        """Guess the meaning of an unknown flag"""
+        if flag.startswith('--'):
+            name = flag[2:].replace('-', ' ')
+            return f"Long option: {name}"
+        elif flag.startswith('-') and len(flag) > 2:
+            return "Combined short options: " + ", ".join(f"-{c}" for c in flag[1:])
+        return "Option (see 'man' for details)"
+    
