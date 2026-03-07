@@ -253,6 +253,7 @@ def _parse_command(self, command: str) -> Dict:
                 result['arguments'].append(token)
         
         return result
+
     
 def _check_safety(self, command: str) -> List[str]:
         """Check for unsafe command patterns"""
@@ -270,4 +271,4 @@ def _guess_flag_meaning(self, flag: str) -> str:
         elif flag.startswith('-') and len(flag) > 2:
             return "Combined short options: " + ", ".join(f"-{c}" for c in flag[1:])
         return "Option (see 'man' for details)"
-    
+
