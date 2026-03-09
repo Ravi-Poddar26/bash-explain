@@ -272,3 +272,23 @@ def _guess_flag_meaning(self, flag: str) -> str:
             return "Combined short options: " + ", ".join(f"-{c}" for c in flag[1:])
         return "Option (see 'man' for details)"
 
+def _identify_argument_type(self, arg: str) -> str:
+        """Identify what type of argument this is"""
+        if arg.startswith('/'):
+            return "Absolute path"
+        elif arg.startswith('~'):
+            return "Home directory path"
+        elif arg.startswith('./') or arg.startswith('../'):
+            return "Relative path"
+        elif '/' in arg:
+            return "Path"
+        elif arg.startswith('$'):
+            return "Variable"
+        elif arg.startswith('"') or arg.startswith("'"):
+            return "String literal"
+        elif arg.isdigit():
+            return "Number"
+        elif '*' in arg or '?' in arg:
+            return "Glob pattern"
+        else:
+            return "Filename or value"
