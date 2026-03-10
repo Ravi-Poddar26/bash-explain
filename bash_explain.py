@@ -292,3 +292,54 @@ def _identify_argument_type(self, arg: str) -> str:
             return "Glob pattern"
         else:
             return "Filename or value"
+        
+class ErrorExplainer:
+    """Explains common Bash and terminal errors"""
+    
+    ERROR_PATTERNS = {
+        r'command not found': {
+            'explanation': 'The shell cannot find the command you typed.',
+            'causes': [
+                'Typo in command name',
+                'Command not installed on system',
+                'Command not in PATH environment variable',
+                'Missing ./ prefix for local script'
+            ],
+            'solutions': [
+                'Check spelling of command',
+                'Install the required package',
+                'Use full path to command',
+                'For local script, use: ./script.sh'
+            ]
+        },
+        r'Permission denied': {
+            'explanation': 'You don\'t have permission to perform this operation.',
+            'causes': [
+                'File is not executable',
+                'Insufficient user permissions',
+                'File/directory owned by another user',
+                'SELinux or AppArmor restrictions'
+            ],
+            'solutions': [
+                'Make file executable: chmod +x filename',
+                'Use sudo if appropriate (be careful!)',
+                'Check file ownership: ls -l filename',
+                'Request access from system administrator'
+            ]
+        },
+        r'No such file or directory': {
+            'explanation': 'The file or directory you specified does not exist.',
+            'causes': [
+                'Typo in filename or path',
+                'File was moved or deleted',
+                'Wrong current directory',
+                'Case sensitivity (Linux is case-sensitive)'
+            ],
+            'solutions': [
+                'Check spelling and case',
+                'Use ls to list available files',
+                'Use pwd to verify current directory',
+                'Use absolute path instead of relative'
+            ]
+        },
+    }
