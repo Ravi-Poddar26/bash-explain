@@ -342,4 +342,55 @@ class ErrorExplainer:
                 'Use absolute path instead of relative'
             ]
         },
+        r'syntax error': {
+            'explanation': 'The shell found invalid syntax in your command or script.',
+            'causes': [
+                'Missing quotes or brackets',
+                'Unclosed string or command substitution',
+                'Invalid operator or special character',
+                'Wrong syntax for control structure'
+            ],
+            'solutions': [
+                'Check for matching quotes and brackets',
+                'Review Bash syntax documentation',
+                'Use shellcheck to validate scripts',
+                'Break complex commands into simpler parts'
+            ]
+        },
+        r'cannot remove.*Directory not empty': {
+            'explanation': 'Cannot delete directory because it contains files.',
+            'causes': [
+                'Using rmdir on non-empty directory',
+                'Directory contains hidden files'
+            ],
+            'solutions': [
+                'Use rm -r to remove directory and contents',
+                'Use rm -ri for interactive deletion (safer)',
+                'Check for hidden files with ls -la'
+            ]
+        },
+        r'Disk quota exceeded': {
+            'explanation': 'You have exceeded your allocated disk space.',
+            'causes': [
+                'Too many files or large files',
+                'Disk quota policy on system'
+            ],
+            'solutions': [
+                'Delete unnecessary files',
+                'Check disk usage: du -sh *',
+                'Contact administrator for quota increase'
+            ]
+        },
+        r'Text file busy': {
+            'explanation': 'Cannot modify file because it is being executed.',
+            'causes': [
+                'Trying to edit or delete running script/binary',
+                'File is currently in use by a process'
+            ],
+            'solutions': [
+                'Stop the running process first',
+                'Use ps aux | grep filename to find process',
+                'Kill process with: kill <PID>'
+            ]
+        },
     }
