@@ -394,3 +394,41 @@ class ErrorExplainer:
             ]
         },
     }
+def explain_error(self, error_message: str) -> str:
+        """Explain a Bash error message"""
+        output = []
+        output.append(f" Error Message: {error_message}\n")
+        
+        # Find matching error pattern
+        matched = False
+        for pattern, info in self.ERROR_PATTERNS.items():
+            if re.search(pattern, error_message, re.IGNORECASE):
+                matched = True
+                output.append(f" Explanation:")
+                output.append(f"   {info['explanation']}\n")
+                
+                output.append("Common Causes:")
+                for i, cause in enumerate(info['causes'], 1):
+                    output.append(f"   {i}. {cause}")
+                output.append("")
+                
+                output.append("Possible Solutions:")
+                for i, solution in enumerate(info['solutions'], 1):
+                    output.append(f"   {i}. {solution}")
+                output.append("")
+                
+                break
+        
+        if not matched:
+            output.append(" This error is not in our database yet.")
+            output.append("   General troubleshooting steps:")
+            output.append("   1. Read the full error message carefully")
+            output.append("   2. Check your command syntax")
+            output.append("   3. Verify file/directory names and paths")
+            output.append("   4. Search online for the specific error")
+            output.append("   5. Check relevant log files")
+            output.append("")
+        
+        output.append("💡 Tip: Copy the exact error message when searching online")
+        
+        return "\n".join(output)
