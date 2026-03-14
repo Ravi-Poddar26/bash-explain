@@ -432,3 +432,40 @@ def explain_error(self, error_message: str) -> str:
         output.append("💡 Tip: Copy the exact error message when searching online")
         
         return "\n".join(output)
+    
+class ScriptExplainer:
+    """Explains Bash scripts line by line"""
+    
+    def explain_script(self, script_path: str) -> str:
+        """Explain a Bash script"""
+        try:
+            with open(script_path, 'r') as f:
+                lines = f.readlines()
+        except FileNotFoundError:
+            return f" Error: Script file '{script_path}' not found"
+        except PermissionError:
+            return f" Error: Permission denied reading '{script_path}'"
+        
+        output = []
+        output.append(f" Explaining Script: {script_path}\n")
+        
+        for i, line in enumerate(lines, 1):
+            line = line.rstrip()
+            
+            if not line or line.strip().startswith('#'):
+                # Comment or empty line
+                if line.strip().startswith('#!'):
+                    output.append(f"{i:3d} | {line}")
+                    output.append("      ↳ Shebang: Tells system which interpreter to use\n")
+                elif line.strip().startswith('#'):
+                    output.append(f"{i:3d} | {line}")
+                    output.append("      ↳ Comment: Explanation for humans, ignored by shell\n")
+                else:
+                    output.append(f"{i:3d} | {line}\n")
+            else:
+                output.append(f"{i:3d} | {line}")
+                explanation = self._explain_line(line.strip())
+                if explanation:
+                    output.append(f"      ↳ {explanation}\n")
+        
+        return "\n".join(output)
