@@ -469,3 +469,58 @@ class ScriptExplainer:
                     output.append(f"      ↳ {explanation}\n")
         
         return "\n".join(output)
+
+    def _explain_line(self, line: str) -> str:
+        """Explain a single line of script"""
+        # Variable assignment
+        if '=' in line and not line.startswith('if') and not line.startswith('['):
+            if line.split('=')[0].strip().isidentifier():
+                var_name = line.split('=')[0].strip()
+                return f"Assigns value to variable '{var_name}'"
+        
+        # Conditionals
+        if line.startswith('if'):
+            return "Conditional: Executes code if condition is true"
+        if line.startswith('elif'):
+            return "Else-if: Alternative condition if previous was false"
+        if line.startswith('else'):
+            return "Else: Executes if all conditions were false"
+        if line.startswith('fi'):
+            return "Ends if statement"
+        
+        # Loops
+        if line.startswith('for'):
+            return "For loop: Iterates over a list of items"
+        if line.startswith('while'):
+            return "While loop: Repeats while condition is true"
+        if line.startswith('until'):
+            return "Until loop: Repeats until condition becomes true"
+        if line.startswith('done'):
+            return "Ends loop"
+        
+        # Functions
+        if '()' in line and '{' in line:
+            func_name = line.split('()')[0].strip()
+            return f"Defines function '{func_name}'"
+        
+        # Case statement
+        if line.startswith('case'):
+            return "Case statement: Matches value against patterns"
+        if line.startswith('esac'):
+            return "Ends case statement"
+        
+        # Common commands
+        if line.startswith('echo'):
+            return "Prints text or variables to terminal"
+        if line.startswith('read'):
+            return "Reads input from user into variable"
+        if line.startswith('exit'):
+            return "Exits script with status code"
+        if line.startswith('return'):
+            return "Returns from function with status code"
+        
+        # Brackets and tests
+        if line.startswith('[') or line.startswith('[['):
+            return "Test condition (checks if something is true)"
+        
+        return "Executes command (see command explanation for details)"
