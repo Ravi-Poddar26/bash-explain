@@ -6,6 +6,7 @@ import sys
 import re
 import argparse
 from typing import Dict, List, Tuple, Optional
+from unicodedata import name
 
 
 class CommandExplainer:
@@ -524,3 +525,54 @@ class ScriptExplainer:
             return "Test condition (checks if something is true)"
         
         return "Executes command (see command explanation for details)"
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='BashExplain - Understand Bash commands, errors, and scripts',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  bashexplain command "ls -lah /home"
+  bashexplain error "bash: command not found"
+  bashexplain script myscript.sh
+        """
+    )
+    
+    subparsers = parser.add_subparsers(dest='mode', help='Mode of operation')
+    
+    # Command mode
+    cmd_parser = subparsers.add_parser('command', help='Explain a Bash command')
+    cmd_parser.add_argument('command', nargs='+', help='Command to explain')
+    
+    # Error mode
+    err_parser = subparsers.add_parser('error', help='Explain an error message')
+    err_parser.add_argument('message', nargs='+', help='Error message to explain')
+    
+    # Script mode
+    script_parser = subparsers.add_parser('script', help='Explain a Bash script')
+    script_parser.add_argument('file', help='Script file to explain')
+    
+    args = parser.parse_args()
+    
+    if not args.mode:
+        parser.print_help()
+        return
+    
+    if args.mode == 'command':
+        command = ' '.join(args.command)
+        explainer = CommandExplainer()
+        print(explainer.explain_command(command))
+    
+    elif args.mode == 'error':
+        error = ' '.join(args.message)
+        explainer = ErrorExplainer()
+        print(explainer.explain_error(error))
+    
+    elif args.mode == 'script':
+        explainer = ScriptExplainer()
+        print(explainer.explain_script(args.file))
+
+if __name__ == '__main__':
+    main()
+    
+    
