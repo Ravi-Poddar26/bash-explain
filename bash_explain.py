@@ -138,7 +138,7 @@ class CommandExplainer:
         (r'nohup\s+.*&\s*$', 'CAUTION: Backgrounding processes without control may leave unmanaged jobs'),
     ]
 
-def explain_command(self, command: str) -> str:
+    def explain_command(self, command: str) -> str:
         """Explain a Bash command in detail"""
         command = command.strip()
         
@@ -201,7 +201,7 @@ def explain_command(self, command: str) -> str:
         output.append("💡 Tip: Use 'man <command>' for detailed documentation")
         
         return "\n".join(output)
-def _parse_command(self, command: str) -> Dict:
+    def _parse_command(self, command: str) -> Dict:
         """Parse command into components"""
         result = {
             'command': None,
@@ -256,7 +256,7 @@ def _parse_command(self, command: str) -> Dict:
         return result
 
     
-def _check_safety(self, command: str) -> List[str]:
+    def _check_safety(self, command: str) -> List[str]:
         """Check for unsafe command patterns"""
         warnings = []
         for pattern, warning in self.UNSAFE_PATTERNS:
@@ -264,7 +264,7 @@ def _check_safety(self, command: str) -> List[str]:
                 warnings.append(warning)
         return warnings
     
-def _guess_flag_meaning(self, flag: str) -> str:
+    def _guess_flag_meaning(self, flag: str) -> str:
         """Guess the meaning of an unknown flag"""
         if flag.startswith('--'):
             name = flag[2:].replace('-', ' ')
@@ -273,7 +273,7 @@ def _guess_flag_meaning(self, flag: str) -> str:
             return "Combined short options: " + ", ".join(f"-{c}" for c in flag[1:])
         return "Option (see 'man' for details)"
 
-def _identify_argument_type(self, arg: str) -> str:
+    def _identify_argument_type(self, arg: str) -> str:
         """Identify what type of argument this is"""
         if arg.startswith('/'):
             return "Absolute path"
@@ -395,7 +395,7 @@ class ErrorExplainer:
             ]
         },
     }
-def explain_error(self, error_message: str) -> str:
+    def explain_error(self, error_message: str) -> str:
         """Explain a Bash error message"""
         output = []
         output.append(f" Error Message: {error_message}\n")
