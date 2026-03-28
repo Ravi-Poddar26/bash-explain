@@ -8,6 +8,30 @@ import argparse
 from typing import Dict, List, Tuple, Optional
 from unicodedata import name
 
+class Colors:
+    RED     = '\033[91m'
+    GREEN   = '\033[92m'
+    YELLOW  = '\033[93m'
+    BLUE    = '\033[94m'
+    MAGENTA = '\033[95m'
+    CYAN    = '\033[96m'
+    WHITE   = '\033[97m'
+    BOLD    = '\033[1m'
+    DIM     = '\033[2m'
+    RESET   = '\033[0m'
+ 
+    @staticmethod
+    def disable():
+        """Turn off all colors (e.g. when output is piped or --no-color used)"""
+        Colors.RED = Colors.GREEN = Colors.YELLOW = Colors.BLUE = ''
+        Colors.MAGENTA = Colors.CYAN = Colors.WHITE = ''
+        Colors.BOLD = Colors.DIM = Colors.RESET = ''
+ 
+ 
+def c(color: str, text: str) -> str:
+    """Wrap text in a color code."""
+    return f"{color}{text}{Colors.RESET}"
+ 
 
 class CommandExplainer:
     """Explains individual Bash commands and their components"""
