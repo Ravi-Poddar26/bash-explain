@@ -8,6 +8,9 @@ import argparse
 from typing import Dict, List, Tuple, Optional
 from unicodedata import name
 
+
+# Terminal Colors
+
 class Colors:
     RED     = '\033[91m'
     GREEN   = '\033[92m'
@@ -19,19 +22,19 @@ class Colors:
     BOLD    = '\033[1m'
     DIM     = '\033[2m'
     RESET   = '\033[0m'
- 
+
     @staticmethod
     def disable():
-        """Turn off all colors (e.g. when output is piped or --no-color used)"""
+        """Turn off all colors (when output is piped or --no-color is used)"""
         Colors.RED = Colors.GREEN = Colors.YELLOW = Colors.BLUE = ''
         Colors.MAGENTA = Colors.CYAN = Colors.WHITE = ''
         Colors.BOLD = Colors.DIM = Colors.RESET = ''
- 
- 
-def c(color: str, text: str) -> str:
+
+
+def clr(color: str, text: str) -> str:
     """Wrap text in a color code."""
     return f"{color}{text}{Colors.RESET}"
- 
+
 
 class CommandExplainer:
     """Explains individual Bash commands and their components"""
@@ -103,7 +106,7 @@ class CommandExplainer:
         '-l': 'Long format (detailed listing)',
         '-h': 'Human-readable (sizes in KB, MB, GB)',
         '-r': 'Recursive (include subdirectories)',
-        '-f': 'Force (don\'t prompt for confirmation)',
+        '-f': "Force (don't prompt for confirmation)",
         '-v': 'Verbose (show detailed output)',
         '-i': 'Interactive (prompt before action)',
         '-n': 'Numeric (use numbers instead of names)',
@@ -170,14 +173,14 @@ class CommandExplainer:
             return "No command provided."
         
         output = []
-        output.append(f" Explaining: {command}\n")
+        output.append(clr(Colors.BOLD + Colors.BLUE, f"📝 Explaining: {command}") + "\n")
         
         # Check for unsafe patterns
         warnings = self._check_safety(command)
         if warnings:
-            output.append("⚠️  SAFETY WARNINGS:")
+            output.append(clr(Colors.RED + Colors.BOLD, "⚠️  SAFETY WARNINGS:"))
             for warning in warnings:
-                output.append(f"   {warning}")
+                output.append(clr(Colors.RED, f"   {warning}"))
             output.append("")
         
         # Parse the command
@@ -187,44 +190,45 @@ class CommandExplainer:
         if parts['command']:
             cmd_name = parts['command']
             cmd_desc = self.COMMON_COMMANDS.get(cmd_name, 'Custom command or script')
-            output.append(f"🔧 Command: {cmd_name}")
-            output.append(f"   {cmd_desc}\n")
+            output.append(clr(Colors.CYAN + Colors.BOLD, f"🔧 Command: {cmd_name}"))
+            output.append(clr(Colors.DIM, f"   {cmd_desc}") + "\n")
         
         # Explain flags
         if parts['flags']:
-            output.append("Flags:")
+            output.append(clr(Colors.YELLOW + Colors.BOLD, "🚩 Flags:"))
             for flag in parts['flags']:
                 flag_desc = self.COMMON_FLAGS.get(flag, self._guess_flag_meaning(flag))
-                output.append(f"   {flag} → {flag_desc}")
+                output.append(f"   {clr(Colors.YELLOW, flag)} → {flag_desc}")
             output.append("")
         
         # Explain arguments
         if parts['arguments']:
-            output.append("Arguments:")
+            output.append(clr(Colors.GREEN + Colors.BOLD, "📂 Arguments:"))
             for i, arg in enumerate(parts['arguments'], 1):
                 arg_type = self._identify_argument_type(arg)
-                output.append(f"   {i}. {arg} ({arg_type})")
+                output.append(f"   {i}. {clr(Colors.GREEN, arg)} ({arg_type})")
             output.append("")
         
         # Explain pipes
         if parts['pipes']:
-            output.append("Pipes:")
+            output.append(clr(Colors.MAGENTA + Colors.BOLD, "🔀 Pipes:"))
             output.append("   Commands are chained - output of one becomes input of next")
             for i, pipe_cmd in enumerate(parts['pipes'], 1):
-                output.append(f"   {i}. {pipe_cmd}")
+                output.append(f"   {i}. {clr(Colors.MAGENTA, pipe_cmd)}")
             output.append("")
         
         # Explain redirections
         if parts['redirections']:
-            output.append("Redirections:")
+            output.append(clr(Colors.BLUE + Colors.BOLD, "↩️  Redirections:"))
             for redir in parts['redirections']:
-                output.append(f"   {redir['symbol']} {redir['target']} → {redir['description']}")
+                output.append(f"   {clr(Colors.BLUE, redir['symbol'])} {clr(Colors.GREEN, redir['target'])} → {redir['description']}")
             output.append("")
         
         # Add educational note
-        output.append("💡 Tip: Use 'man <command>' for detailed documentation")
+        output.append(clr(Colors.GREEN, "💡 Tip: Use 'man <command>' for detailed documentation"))
         
         return "\n".join(output)
+
     def _parse_command(self, command: str) -> Dict:
         """Parse command into components"""
         result = {
@@ -279,7 +283,6 @@ class CommandExplainer:
         
         return result
 
-    
     def _check_safety(self, command: str) -> List[str]:
         """Check for unsafe command patterns"""
         warnings = []
@@ -338,7 +341,7 @@ class ErrorExplainer:
             ]
         },
         r'Permission denied': {
-            'explanation': 'You don\'t have permission to perform this operation.',
+            'explanation': "You don't have permission to perform this operation.",
             'causes': [
                 'File is not executable',
                 'Insufficient user permissions',
@@ -419,25 +422,26 @@ class ErrorExplainer:
             ]
         },
     }
+
     def explain_error(self, error_message: str) -> str:
         """Explain a Bash error message"""
         output = []
-        output.append(f" Error Message: {error_message}\n")
+        output.append(clr(Colors.RED + Colors.BOLD, f"🔴 Error Message: {error_message}") + "\n")
         
         # Find matching error pattern
         matched = False
         for pattern, info in self.ERROR_PATTERNS.items():
             if re.search(pattern, error_message, re.IGNORECASE):
                 matched = True
-                output.append(f" Explanation:")
+                output.append(clr(Colors.CYAN + Colors.BOLD, "📖 Explanation:"))
                 output.append(f"   {info['explanation']}\n")
                 
-                output.append("Common Causes:")
+                output.append(clr(Colors.YELLOW + Colors.BOLD, "🔍 Common Causes:"))
                 for i, cause in enumerate(info['causes'], 1):
                     output.append(f"   {i}. {cause}")
                 output.append("")
                 
-                output.append("Possible Solutions:")
+                output.append(clr(Colors.GREEN + Colors.BOLD, "✅ Possible Solutions:"))
                 for i, solution in enumerate(info['solutions'], 1):
                     output.append(f"   {i}. {solution}")
                 output.append("")
@@ -445,7 +449,7 @@ class ErrorExplainer:
                 break
         
         if not matched:
-            output.append(" This error is not in our database yet.")
+            output.append(clr(Colors.DIM, "   This error is not in our database yet."))
             output.append("   General troubleshooting steps:")
             output.append("   1. Read the full error message carefully")
             output.append("   2. Check your command syntax")
@@ -454,7 +458,7 @@ class ErrorExplainer:
             output.append("   5. Check relevant log files")
             output.append("")
         
-        output.append("💡 Tip: Copy the exact error message when searching online")
+        output.append(clr(Colors.GREEN, "💡 Tip: Copy the exact error message when searching online"))
         
         return "\n".join(output)
     
@@ -467,12 +471,12 @@ class ScriptExplainer:
             with open(script_path, 'r') as f:
                 lines = f.readlines()
         except FileNotFoundError:
-            return f" Error: Script file '{script_path}' not found"
+            return clr(Colors.RED, f"❌ Error: Script file '{script_path}' not found")
         except PermissionError:
-            return f" Error: Permission denied reading '{script_path}'"
+            return clr(Colors.RED, f"❌ Error: Permission denied reading '{script_path}'")
         
         output = []
-        output.append(f" Explaining Script: {script_path}\n")
+        output.append(clr(Colors.CYAN + Colors.BOLD, f"📜 Explaining Script: {script_path}") + "\n")
         
         for i, line in enumerate(lines, 1):
             line = line.rstrip()
@@ -480,18 +484,18 @@ class ScriptExplainer:
             if not line or line.strip().startswith('#'):
                 # Comment or empty line
                 if line.strip().startswith('#!'):
-                    output.append(f"{i:3d} | {line}")
-                    output.append("      ↳ Shebang: Tells system which interpreter to use\n")
+                    output.append(clr(Colors.DIM, f"{i:3d} | ") + clr(Colors.MAGENTA + Colors.BOLD, line))
+                    output.append(clr(Colors.DIM, "      ↳ Shebang: Tells system which interpreter to use") + "\n")
                 elif line.strip().startswith('#'):
-                    output.append(f"{i:3d} | {line}")
-                    output.append("      ↳ Comment: Explanation for humans, ignored by shell\n")
+                    output.append(clr(Colors.DIM, f"{i:3d} | {line}"))
+                    output.append(clr(Colors.DIM, "      ↳ Comment: Explanation for humans, ignored by shell") + "\n")
                 else:
-                    output.append(f"{i:3d} | {line}\n")
+                    output.append(clr(Colors.DIM, f"{i:3d} | {line}") + "\n")
             else:
-                output.append(f"{i:3d} | {line}")
+                output.append(clr(Colors.DIM, f"{i:3d} | ") + line)
                 explanation = self._explain_line(line.strip())
                 if explanation:
-                    output.append(f"      ↳ {explanation}\n")
+                    output.append(clr(Colors.DIM, "      ↳ ") + clr(Colors.GREEN, explanation) + "\n")
         
         return "\n".join(output)
 
@@ -561,6 +565,11 @@ Examples:
   bashexplain script myscript.sh
         """
     )
+
+    parser.add_argument(
+        '--no-color', action='store_true',
+        help='Disable colored output (useful when piping)'
+    )
     
     subparsers = parser.add_subparsers(dest='mode', help='Mode of operation')
     
@@ -577,6 +586,10 @@ Examples:
     script_parser.add_argument('file', help='Script file to explain')
     
     args = parser.parse_args()
+
+    # Disable color when piping or --no-color flag is used
+    if args.no_color or not sys.stdout.isatty():
+        Colors.disable()
     
     if not args.mode:
         parser.print_help()
@@ -598,5 +611,3 @@ Examples:
 
 if __name__ == '__main__':
     main()
-    
-    
