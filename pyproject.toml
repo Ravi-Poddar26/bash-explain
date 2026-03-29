@@ -55,3 +55,4 @@ dev = [
 
 [tool.setuptools]
 py-modules = ["bash_explain"]
+license-files = []
